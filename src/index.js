@@ -7,7 +7,7 @@ import {Suspense, lazy, StrictMode} from 'react';
 import {render} from 'react-dom';
 import {BrowserRouter as Router} from 'react-router-dom';
 
-const App = lazy(() => retry(() => import('./App')));
+const App = lazy(() => retry(() => import('./app')));
 const rootElement = document.getElementById('root');
 
 const main = () =>
