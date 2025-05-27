@@ -30,6 +30,7 @@ import {
 } from 'd3-scale-chromatic';
 import {select} from 'd3-selection';
 import {transition} from 'd3-transition';
+import {zoom as d3Zoom} from 'd3-zoom';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useHistory} from 'react-router-dom';
@@ -662,9 +663,49 @@ function MapVisualizer({
     statistic,
   ]);
 
+  // --- Add zoom/pan support ---
+  useEffect(() => {
+    const svg = select(svgRef.current);
+    svg.on('.zoom', null); // Remove previous zoom if any
+    svg.call(
+      d3Zoom()
+        .scaleExtent([1, 8])
+        .on('zoom', (event) => {
+          svg.selectAll('g').attr('transform', event.transform);
+        })
+    );
+  }, []);
+
   return (
     <>
-      <div className="svg-parent">
+      {/* Zoom controls */}
+      <div style={{position: 'absolute', top: 10, right: 10, zIndex: 10}}>
+        <button
+          onClick={() => {
+            const svg = select(svgRef.current);
+            svg.transition().call(d3Zoom().scaleBy, 1.2);
+          }}
+        >
+          +
+        </button>
+        <button
+          onClick={() => {
+            const svg = select(svgRef.current);
+            svg.transition().call(d3Zoom().scaleBy, 0.8);
+          }}
+        >
+          -
+        </button>
+      </div>
+      <div
+        className="svg-parent"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
         <svg
           id="chart"
           className={classnames({
@@ -673,6 +714,11 @@ function MapVisualizer({
           viewBox={`0 0 ${MAP_DIMENSIONS[0]} ${MAP_DIMENSIONS[1]}`}
           preserveAspectRatio="xMidYMid meet"
           ref={svgRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+          }}
         >
           <g className="regions" />
           <g className="state-borders" />
